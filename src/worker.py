@@ -112,6 +112,13 @@ def run_parallel(
     workers_per_gpu = cfg.workers.workers_per_gpu
     total_workers = num_gpus * workers_per_gpu
 
+    # Pre-cache models so workers don't all hit the network
+    print("Pre-caching models...")
+    from .pipeline import build_converter, configure_docling_settings
+    configure_docling_settings(cfg)
+    _warmup = build_converter(cfg)
+    del _warmup
+
     print(f"Launching {total_workers} workers ({workers_per_gpu} per GPU x {num_gpus} GPUs)")
     print(f"Processing {len(pdf_paths)} PDFs")
 
