@@ -1,0 +1,17 @@
+# Tuned for 2x NVIDIA H100 (80 GB VRAM each)
+
+[pipeline]
+device = "cuda:0"
+ocr_backend = "torch"
+ocr_batch_size = 64
+layout_batch_size = 64
+table_batch_size = 32
+document_timeout = 120.0
+
+[workers]
+num_gpus = 2
+workers_per_gpu = 8
+
+[batch]
+doc_batch_size = 1
+page_batch_size = 16
