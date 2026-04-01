@@ -97,12 +97,28 @@ def extract_batch(pdf_paths: list[Path], converter) -> list[dict]:
     return results
 
 
+def _collect_pdfs(input_path: Path) -> list[Path]:
+    if input_path.is_file():
+        return [input_path]
+    elif input_path.is_dir():
+        pdfs = sorted(p for p in input_path.iterdir() if p.suffix.lower() == ".pdf")
+        if not pdfs:
+            print(f"ERROR: No PDFs found in {input_path}", file=sys.stderr)
+            sys.exit(1)
+        return pdfs
+    else:
+        print(f"ERROR: {input_path} is not a file or directory", file=sys.stderr)
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(prog="docling-fast", description="GPU-accelerated PDF extraction to JSON")
     parser.add_argument("-i", "--input", required=True, help="PDF file or directory of PDFs")
     parser.add_argument("-o", "--output", default=None, help="Output directory (default: results/)")
     parser.add_argument("-c", "--config", default=None, help="Config TOML file")
     parser.add_argument("-p", "--profile", default=None, help="Hardware profile name or TOML path")
+    parser.add_argument("-w", "--workers", type=int, default=None,
+                        help="Workers per GPU (enables parallel mode). E.g. -w 6 for 6 workers/GPU")
     parser.add_argument("--single-file", action="store_true", help="Write all results to one JSON file")
     args = parser.parse_args()
 
@@ -110,25 +126,29 @@ def main():
 
     require_cuda()
 
-    cfg = load_config(config_path=args.config, hardware_profile=args.profile)
+    overrides = {}
+    if args.workers:
+        overrides["workers"] = {"workers_per_gpu": args.workers}
+
+    cfg = load_config(config_path=args.config, hardware_profile=args.profile, overrides=overrides)
+    output_dir = Path(args.output) if args.output else Path(cfg.output.dir)
+    pdf_paths = _collect_pdfs(Path(args.input))
+
+    # Parallel mode: multiple workers per GPU
+    if cfg.workers.workers_per_gpu > 1:
+        from .worker import run_parallel
+
+        summary = run_parallel(pdf_paths, cfg, output_dir)
+        summary_path = output_dir / "parallel_summary.json"
+        with open(summary_path, "w") as f:
+            json.dump(summary, f, indent=2)
+        print(f"Summary: {summary_path}")
+        return
+
+    # Sequential mode: single worker
     configure_docling_settings(cfg)
 
-    output_dir = Path(args.output) if args.output else Path(cfg.output.dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Collect PDFs
-    input_path = Path(args.input)
-    if input_path.is_file():
-        pdf_paths = [input_path]
-    elif input_path.is_dir():
-        pdf_paths = sorted(p for p in input_path.iterdir() if p.suffix.lower() == ".pdf")
-    else:
-        print(f"ERROR: {input_path} is not a file or directory", file=sys.stderr)
-        sys.exit(1)
-
-    if not pdf_paths:
-        print(f"ERROR: No PDFs found in {input_path}", file=sys.stderr)
-        sys.exit(1)
 
     print(f"Processing {len(pdf_paths)} PDFs (device={cfg.pipeline.device}, "
           f"ocr_batch={cfg.pipeline.ocr_batch_size})")

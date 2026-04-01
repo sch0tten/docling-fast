@@ -26,6 +26,11 @@ class BatchConfig(BaseModel):
     page_batch_size: int = 4
 
 
+class WorkersConfig(BaseModel):
+    num_gpus: int = 0           # 0 = auto-detect all available GPUs
+    workers_per_gpu: int = 1    # worker processes per GPU
+
+
 class BenchmarkConfig(BaseModel):
     test_ocr_batch_sizes: list[int] = Field(default_factory=lambda: [4, 8, 16, 32, 48, 64])
     test_layout_batch_sizes: list[int] = Field(default_factory=lambda: [4, 8, 16, 32])
@@ -46,6 +51,7 @@ class SamplesConfig(BaseModel):
 class AppConfig(BaseModel):
     pipeline: PipelineConfig = PipelineConfig()
     batch: BatchConfig = BatchConfig()
+    workers: WorkersConfig = WorkersConfig()
     benchmark: BenchmarkConfig = BenchmarkConfig()
     output: OutputConfig = OutputConfig()
     samples: SamplesConfig = SamplesConfig()

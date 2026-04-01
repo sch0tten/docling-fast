@@ -15,3 +15,4 @@ from .config import AppConfig, load_config
 from .extract import extract_batch, extract_one
 from .gpu_probe import probe_gpu
 from .pipeline import build_converter, configure_docling_settings
+from .worker import run_parallel

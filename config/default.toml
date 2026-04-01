@@ -12,6 +12,10 @@ force_full_page_ocr = false
 ocr_text_score = 0.5
 document_timeout = 120.0
 
+[workers]
+num_gpus = 0       # 0 = auto-detect
+workers_per_gpu = 1  # 1 = sequential mode; 6 = proven sweet spot on V100
+
 [batch]
 doc_batch_size = 1
 page_batch_size = 4

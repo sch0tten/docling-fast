@@ -1,0 +1,17 @@
+# Tuned for 8x NVIDIA V100 (16/32 GB VRAM each)
+
+[pipeline]
+device = "cuda:0"
+ocr_backend = "torch"
+ocr_batch_size = 16
+layout_batch_size = 16
+table_batch_size = 8
+document_timeout = 120.0
+
+[workers]
+num_gpus = 0       # auto-detect (expects 8)
+workers_per_gpu = 6
+
+[batch]
+doc_batch_size = 1
+page_batch_size = 4
