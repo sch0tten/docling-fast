@@ -1,0 +1,31 @@
+# docling-fast default configuration
+
+[pipeline]
+device = "cuda:0"
+num_threads = 4
+ocr_backend = "torch"
+ocr_batch_size = 4
+layout_batch_size = 4
+table_batch_size = 4
+do_table_structure = true
+force_full_page_ocr = false
+ocr_text_score = 0.5
+document_timeout = 120.0
+
+[batch]
+doc_batch_size = 1
+page_batch_size = 4
+
+[benchmark]
+test_ocr_batch_sizes = [4, 8, 16, 32, 48, 64]
+test_layout_batch_sizes = [4, 8, 16, 32]
+test_table_batch_sizes = [4, 16]
+warmup_docs = 2
+max_docs = 50
+
+[output]
+format = "json"
+dir = "results"
+
+[samples]
+dir = "samples"

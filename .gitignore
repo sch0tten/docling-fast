@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+debug/
+.env
+
+# Generated data — rebuild with tools
+results/*.json
+samples/*.pdf
+samples/*.json

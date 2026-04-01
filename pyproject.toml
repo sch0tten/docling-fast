@@ -1,0 +1,26 @@
+[project]
+name = "docling-fast"
+version = "0.1.0"
+description = "GPU-accelerated batch PDF extraction with Docling + RapidOCR"
+requires-python = ">=3.12"
+dependencies = [
+    "docling>=2.80.0",
+    "rapidocr>=3.7.0",
+    "tomli>=2.0.0",
+    "pynvml>=11.5.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "PyMuPDF>=1.25.0",
+]
+
+[project.scripts]
+docling-fast = "src.extract:main"
+docling-bench = "src.benchmark:main"
+docling-probe = "src.gpu_probe:main"
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
