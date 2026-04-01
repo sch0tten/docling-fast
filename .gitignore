@@ -8,6 +8,9 @@ debug/
 .env
 
 # Generated data — rebuild with tools
-results/*.json
+results/
 samples/*.pdf
 samples/*.json
+
+# Bench samples are committed (small PDFs for testing)
+!samples/bench/
